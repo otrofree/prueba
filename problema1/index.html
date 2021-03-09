@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Respuesta problema 1</title>
+  </head>
+  <style>
+	.console {
+		width:90%;
+		left:20px;
+		height: 100px;
+		border: 2px solid blue;
+		overflow: scroll;
+	}
+	
+	#output {
+		height: 200px !important;
+	}
+  </style>
+  <body>
+    <br>
+	<H3>Problema 1 de "Prueba Software Engineer"</H3> 
+	Respuesta al problema del recorrido de caracol.
+	
+	<br><br>
+	<H3>Instrucciones</H3> 
+	En el campo de entrada escriba el arreglo de dos dimensiones que se desea procesar (puedes poner varios arreglos, uno en cada renglon), después oprime el boton de procesar
+		
+	<br><br>
+	<H3>Entrada</H3>
+	<textarea id="input" class="console">[ [1,2,3], [4,5,6], [7,8,9] ]
+[[1,2,3,4],[5,6,7,8],[9,10,11,12]]
+[[1,2,3],[4,5,6],[7,8,9],[10,11,12]]
+	</textarea>
+	<br>
+	<input type="button" onclick="procesa()" value="Procesa">
+	
+	
+	<br><br>
+	<H3>Salida</H3>
+	<pre id="output" class="console">
+	</pre>
+  </body>
+  
+  <script>
+	/*
+	Objetivo:
+	Solución al problema No. 1 de la "Prueba Software Engineer" para la empresa "Intelligential".
+
+	Descripción:
+	Se recorre el arreglo en el orden: derecha, abajo, izquierda, arriba; teniendo en cuenta los limites derechos. En las siguientes iteraciones se cambia el lugar donde se comienza recorre y el tamaño a recorre. Se continua iterando hasta que se ha pasado todo el arreglo.
+
+	Adicionalmente se verifica que el arreglo sea entrada válida para el programa.
+	
+	TODO:
+	* Mejorar los mensajes de errores para marcar donde se encuentra exactamente el error.
+	* Crear una función de prueba masiva 
+
+	Fecha Creación: 8-10-2021
+	Fecha Modificación: --
+	Autor: Eliot Peña
+	Licencia: por especificar
+
+	*/
+
+	//  mensajes de error.
+	const errCode={
+		'noArr': "El argumento No es un arreglo o alguno de sus elementos no es un arreglo",
+		'noSize': "El arreglo debe tener por lo menos dos dimensiones",
+		'noSameSize': "El arreglo no tiene la misma dimensión en todas los renglones",
+	}
+
+	// verifica que sea una entrada valida
+	function isValidMatix(array) {
+
+		let m=[];
+		
+		try {
+			m= JSON.parse(array);
+		}catch(e) {
+			return {edo:false, data:errCode['noArr']};
+		}
+		
+		//console.log("este es el arreglo",m);
+		if(!Array.isArray(m)) {
+			return {edo:false, data:errCode['noArr']};
+		}
+		
+		// no tiene tamaño correcto
+		if(m.length<2) {
+			return {edo:false, data:errCode['noSize']};
+		}	
+		
+		// mismo tamaño en todos los renglones
+		let sizeX=0;
+		for(let i=0; i< m.length; i++) {
+			if(!Array.isArray(m[i])) return {edo:false, data:errCode['noArr']};
+			if(!i) sizeX=m[i].length;
+			else {
+				if(m[i].length != sizeX) return {edo:false, data:errCode['noSameSize']};
+			}
+		}
+
+		// todo bien
+		return {edo:true, data: m };
+	}
+
+	function caracol(arrIn){
+		// verifica si es un arreglo válido
+		let isOk= isValidMatix(arrIn);
+
+		//console.log("----------",isOk);
+		if(isOk.edo != true){
+			// es un error
+			return {edo:"error", data:isOk.data};
+		} else {
+			// todo bien, procedo
+			let arr=isOk.data;
+			
+			const ret = [];
+
+			// tamaños
+			let sizeX=arr[0].length;
+			let sizeY=arr.length;
+
+			let x=0,y=0;
+			let startX=0, startY=0;
+
+			while(startX<sizeX || startY<sizeY)  {
+				
+				y=startY;
+				x=startX;
+
+				// movimiento a  derecha
+				while(x < sizeX) { ret.push(arr[y][x++]); }
+				y++;
+				x--;
+
+				// movimiento abajo
+				while(y < sizeY) { ret.push(arr[y++][x]);	}
+				y--;
+				x--;
+
+				// movimiento izquierda
+				while(x>=startX && y != startY) { ret.push(arr[y][x--]); }
+				y--;
+				x++;
+				
+				// movimiento arriba
+				while(y>startY) { ret.push(arr[y--][x]); }
+				
+				// recaulculo los nuevos limites e inicios del siguiente ciclo
+				startX++;
+				startY++;
+				sizeX--;
+				sizeY--;			
+			}
+
+			return ret;
+		}
+	}
+
+	// simplemente para la interface
+	// aqui se procesa el elemento
+	var In= document.getElementById("input");
+	var Out= document.getElementById("output");
+	
+	function procesa() {
+		let value= In.value.split("\n");
+		try {
+			consola("\n\n ----- Nueva corrida ----------- \n");
+			value.forEach((v) => {				
+				v=v.trim();
+				if(v.length>0)
+					procesaLinea(v);
+			});
+			
+		} catch(e) {
+			consola(e.toString());
+		}
+	}
+	
+	function procesaLinea(value) {
+		try {
+			let resp= caracol(value);
+			if(resp.edo == "error") {
+				consola("\n"+ resp.data+ "\n\n Intenta con otro.");
+			} else {				
+				consola("[ "+ resp + " ]");
+			}		
+		} catch(e) {
+			consola(e.toString());
+		}
+	}
+
+	function consola(txt) {
+		Out.textContent= Out.textContent + "\n" + txt;
+		Out.scrollTop = Out.scrollHeight;
+	}
+  
+  </script>
+  
+</html>
