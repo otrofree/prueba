@@ -15,3 +15,10 @@ Probado en:
 ## problema2
 
 En el directorio se encuentran los diseños del proyecto de la tienda de artesanías.
+
+El archivo **Diseno_gral.pdf** es el documento. En el directorio *soporte* se ecuentran todos los archivos que fueron soporte para generar este documento.
+
+
+## problema3
+
+Para esta solución se decidió u
