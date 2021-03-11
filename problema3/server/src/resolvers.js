@@ -2,7 +2,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { APP_SECRET } = require('./utils');
 
-
+const msgs ={
+	userNotFound:"El usuario no existe",
+	invalidPassword: "Password invalido",
+	bookNotFound:"El libro no existe",
+	borrowNotFound: "Prestamo no existe",
+	notGrants:"No tienes permisos para realizar esta accion",	
+}
 
 
 module.exports = {
@@ -35,12 +41,12 @@ module.exports = {
 			});
 			
 			if (!usuario) {
-				throw new Error('No such user found');
+				throw new Error(msgs.userNotFound);
 			}
 
 			const valid = await bcrypt.compare( args.password, usuario.clave );
 			if (!valid) {
-				throw new Error('Invalid password');
+				throw new Error(msgs.invalidPassword);
 			}
 
 			const token = jwt.sign({ userId: usuario.id, rol: usuario.rol }, APP_SECRET);
@@ -57,7 +63,7 @@ module.exports = {
 			});
 			
 			if (!usuario) {
-				throw new Error('No such user found');
+				throw new Error(msgs.userNotFound);
 			}
 			
 			const password = await bcrypt.hash(args.password, 10);
@@ -87,6 +93,17 @@ module.exports = {
 		delUser: async(parent, args, context, info) => {
 			// checar el rol que
 			
+			// veo que el usuario exista
+			const userT = await context.prisma.usuario.findUnique({
+				where: { usuarioId: args.usuarioId  },
+				select: { usuarioId: true }
+			});
+			
+			if(!userT) {
+				throw new Error(msgs.userNotFound);
+			}			
+			
+			// procedo			
 			const usuario = await context.prisma.usuario.delete({
 				 where: { usuarioId: args.usuarioId  },
 			});
@@ -97,7 +114,18 @@ module.exports = {
 		
 		editUser: async(parent, args, context, info) => { 
 			// checar el rol que
+
+			// veo que el usuario exista
+			const userT = await context.prisma.usuario.findUnique({
+				where: { usuarioId: args.usuarioId  },
+				select: { usuarioId: true }
+			});
 			
+			if(!userT) {
+				throw new Error(msgs.userNotFound);
+			}			
+			
+			// procedo						
 			if(args.password) {				
 				// encripto la clave
 				args.clave = await bcrypt.hash(args.password, 10);
@@ -111,6 +139,119 @@ module.exports = {
 			
 			return usuario;
 		},
+		
+		
+		newBook: async(parent, args, context, info) => { 
+			// checar el rol que
+			
+			const libro = await context.prisma.libro.create({
+				data: { ...args }
+			});
+			
+			return libro;
+		},
+		
+		deleteBook: async(parent, args, context, info) => {
+			// checar el rol que
+			
+			// TODO - verificar que el libro no este prestado
+			// veo que el libro exista
+			const libroT = await context.prisma.libro.findUnique({
+				where: { libroId: args.libroId },
+				select: {libroId:true}
+			});
+			
+			if(!libroT) {
+				throw new Error(msgs.bookNotFound);
+			}			
+			
+			// procedo			
+			const libro = await context.prisma.libro.delete({
+				 where: { libroId: args.libroId  },
+			});
+			
+			return libro;
+		},
+		
+		
+		editBook: async(parent, args, context, info) => { 
+			// checar el rol que
+
+			// veo que el libro exista
+			const libroT = await context.prisma.libro.findUnique({
+				where: { libroId: args.libroId }, 
+				select: {libroId:true}
+			});
+			
+			if(!libroT) {
+				throw new Error(msgs.bookNotFound);
+			}			
+			
+			// procedo
+			const libro = await context.prisma.libro.update({
+				 where: { libroId: args.libroId  },
+				 data: {... args}
+			});
+			
+			return libro;
+		},
+		
+		
+		newBorrow: async(parent, args, context, info) => { 
+			// checar el rol que
+			
+			const libro = await context.prisma.prestamo.create({
+				data: { ...args, estado:0  }
+			});
+			//console.log(libro);
+			return libro;
+		},
+		
+		
+		confirmBorrow: async(parent, args, context, info) => { 
+			// checar el rol que
+			
+			
+			// veo que el prestamo exista
+			const prestamo = await context.prisma.prestamo.findUnique({
+				where: { prestamoId: args.prestamoId },
+			});
+			
+			if(!prestamo) {
+				throw new Error(msgs.borrowNotFound);
+			}
+			
+			// procedo
+			await context.prisma.prestamo.update({
+				where: { prestamoId: args.prestamoId },
+				data: { ...args, estado:1  }
+			});
+			
+			return {msg:"ok"}
+		},
+		
+		
+		returnBorrow: async(parent, args, context, info) => { 
+			// checar el rol que
+
+			// veo que el prestamo exista
+			const prestamo = await context.prisma.prestamo.findUnique({
+				where: { prestamoId: args.prestamoId },
+			});
+			
+			if(!prestamo) {
+				throw new Error(msgs.borrowNotFound);
+			}
+			
+			// procedo
+			await context.prisma.prestamo.update({
+				where: { prestamoId: args.prestamoId },
+				data: { ...args, estado:2  }
+			});
+			
+			return {msg:"ok"}
+		},
+		
 		
 	},
   

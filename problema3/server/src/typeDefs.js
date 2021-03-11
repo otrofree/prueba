@@ -27,8 +27,8 @@ const typeDefs = gql`
 		libro: Book
 		estado: Int
 	}
-	type Confirm {
-		msg: String
+	type Msg {
+		msg:String
 	}
 	type Query {
 		allUser(email:String):[User!]!
@@ -44,11 +44,12 @@ const typeDefs = gql`
 		editUser(usuarioId:Int!, email: String, nombre: String, password: String, rol: Int): User
 		
 		newBook(titulo: String!, autor: String!, editorial: String!,sinopsis: String, edicion: String): Book
-		deleteBook(libroId: Int, titulo: String!): Book
-		editBook(libroId: Int, titulo: String, autor: String, editorial: String, sinopsis: String, edicion: String): Book		
+		deleteBook(libroId: Int!): Book
+		editBook(libroId: Int!, titulo: String, autor: String, editorial: String, sinopsis: String, edicion: String): Book		
 		
 		newBorrow(libroId: Int!, usuarioId: Int!): Borrow
-		confirmBorrow(prestamoId: Int!): Confirm
+		confirmBorrow(prestamoId: Int!): Msg
+		returnBorrow(prestamoId: Int!): Msg
 	}  
 `;
 module.exports = typeDefs;

@@ -14,7 +14,7 @@ model Libro {
   editorial String
   sinopsis  String?
   edicion   String?
-  prestamo  Prestamo?
+  prestamo  Prestamo[]
 }
 
 model Usuario {
@@ -35,7 +35,7 @@ model Prestamo {
   libro      Libro   @relation(fields: [libroId], references: [libroId])
   libroId    Int
 
-  estado          Int @default(0) // si el prestamo esta autorizado o no
+  estado          Int @default(0) // 0-pendiente autorizar, 1-autorizado, 2-devuelto
   fPrestado        DateTime @default(now())      // fecha de prestamo
   fEntregaEstimada DateTime @default(now())		 
   fEntregaReal     DateTime @default(now())
