@@ -1,0 +1,42 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Libro {
+  libroId   Int        @id @default(autoincrement())
+  titulo    String     @unique
+  autor     String
+  editorial String
+  sinopsis  String?
+  edicion   String?
+  prestamo  Prestamo?
+}
+
+model Usuario {
+  usuarioId Int        @id @default(autoincrement())
+  email     String     @unique
+  nombre    String?
+  clave     String
+  activo    Int        @default(0)   // 0-no activo, 1-activo
+  rol       Int        @default(2)  // 0-admin, 1-bibliotecario, 2-lector
+  prestamos  Prestamo[]
+}
+
+model Prestamo {
+  prestamoId Int     @id @default(autoincrement())
+  
+  usuario    Usuario @relation(fields: [usuarioId], references: [usuarioId])
+  usuarioId  Int
+  libro      Libro   @relation(fields: [libroId], references: [libroId])
+  libroId    Int
+
+  estado          Int @default(0) // si el prestamo esta autorizado o no
+  fPrestado        DateTime @default(now())      // fecha de prestamo
+  fEntregaEstimada DateTime @default(now())		 
+  fEntregaReal     DateTime @default(now())
+}

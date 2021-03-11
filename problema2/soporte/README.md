@@ -1,7 +1,7 @@
 ### archivos de soporte para el proyecto.
 
 #### diseno_gral.docx
-Es el archivo que junta los demás diagramas y diseños. Se habre con microsoft Office o LibreOffice. 
+Es el archivo que junta los demás diagramas y diseños. Se habre con Microsoft Office o LibreOffice. 
 
 #### diagrama_general.pptx
 Aqui se encuentrasn los diagramas. Se habre con microsoft Office o LibreOffice 
