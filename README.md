@@ -48,15 +48,22 @@ Cabe mencionar que antes de realizar esta prueba no sabia las tecnologías Apollo
 Debes tener instalado Node.js v10 o más, yarn (dentro de nodejs)
 
 Necesitas dos terminales del shell:
+
 **Terminal 1** 
+
+```
 cd server
 yarn install
 yarn dev
+```
 
 **Terminal 2** 
+
+```
 cd reactjs
 yarn install
 http-server build
+```
 
 despues habir tu navegaor esta dirección [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
 
