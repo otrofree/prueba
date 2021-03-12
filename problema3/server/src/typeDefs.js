@@ -11,6 +11,7 @@ const typeDefs = gql`
 	type AuthPayload {
 		token: String
 		usuario: User
+		rol: Int
 	}
 	type Book {
 		libroId: Int

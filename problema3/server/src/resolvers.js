@@ -54,7 +54,8 @@ module.exports = {
 
 			return {
 				token,
-				usuario
+				usuario,
+				rol:usuario.rol
 				};
 		},
 		

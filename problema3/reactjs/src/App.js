@@ -13,9 +13,10 @@ import { Button, Navbar, Form, Modal, Section, Container, Notification, Media, I
 
 // los componentes propios de la interfaz		
 import AdminUsers from './AdminUsers'
-//import AdminBook from './AdminBook'
+import AdminBook from './AdminBook'
 		
 const { Input, Field, Control, Label } = Form;
+
 
  
 const LOGIN = gql`
@@ -31,57 +32,6 @@ const LOGIN = gql`
   }
 `;
 
-const ALLBOOK = gql`
-  query {
-	allBook {
-      libroId
-      titulo
-      editorial
-      autor
-      sinopsis
-      edicion
-	}
-  }
-`;
-
-const ALLUSER = gql`
-   query {
-	allUser {
-      usuarioId
-      nombre
-      email
-      rol
-    }
-   }
- `;
-
- 
- const EDITUSER =gql`
- mutation EditUser($email: String, $password: String, $rol: Int, $nombre: String, $usuarioId: Int!) {
-  editUser(usuarioId: $usuarioId, email: $email, password: $password, rol: $rol, nombre: $nombre) {
-    usuarioId
-    nombre
-    rol
-	email
-  }
-}
- `;
- 
- const NEWUSER =gql`
-	mutation NewUser($email: String!, $nombre: String!, $password: String!, $rol: Int!) {
-		newUser(email: $email, nombre: $nombre, password: $password, rol: $rol) {
-			usuarioId
-		}
-	}
- `;
- 
-const DELUSER=gql`
-	mutation DelUser($usuarioId: Int!) {
-		delUser(usuarioId: $usuarioId) {
-			email
-		}
-	}
- `;
  
 // el formulario de Login
 function Login(props) {
@@ -89,12 +39,12 @@ function Login(props) {
   const update = (({ target }) => setForm({ ...form, [target.name]: target.value }))
   return (
     <React.Fragment>
-	 <div class="container is-fluid">
+	 <div className="container is-fluid">
 
-      <section data-section-id="1" data-category="sign-in"  class="section">
-        <div class="container has-text-centered">
-          <div class="columns is-centered">
-            <div class="column is-5 is-4-desktop">
+      <section data-section-id="1" data-category="sign-in"  className="section">
+        <div className="container has-text-centered">
+          <div className="columns is-centered">
+            <div className="column is-5 is-4-desktop">
 			
 			   <Field>
 				<Control>
@@ -182,16 +132,11 @@ function BuquedaComp(props) {
 
 var LibrosCont = withApollo((props) =>{
 	async function doSearch(qry){
-		props.client
-		  .query({
-			query: ALLBOOK
-		  })
-		  .then(result => console.log("jjjj",result));		  
 	}
 	
 	return (
 		<React.Fragment>
-			<h1 class="title">Busqueda de libros</h1>
+			<h1 className="title">Busqueda de libros</h1>
 			<BuquedaComp search={doSearch} />
 			<div> OK </div>
 		</React.Fragment>
@@ -200,11 +145,7 @@ var LibrosCont = withApollo((props) =>{
 
 var Solicitudes = withApollo((props) =>{
 	async function doSearch(qry){
-		props.client
-		  .query({
-			query: ALLBOOK
-		  })
-		  .then(result => console.log("jjjj",result));		  
+
 	}
 	
 	return (
@@ -216,183 +157,15 @@ var Solicitudes = withApollo((props) =>{
 	);
 })
 
-/*
-var AdminUsers = withApollo((props) =>{
-	// los datos de todos los usuarios
-	const { loading, error, data, refetch } = useQuery(ALLUSER); 
-	const [editItem, setEditItem] = useState(-1);
-	const [newItem, setNewItem] = useState(false);
-	
-	// para el formulario de edicion de datos
-	const [form, setForm] = useState({ email: '', nombre:'', rol:'', password: '', usuarioId:-1 });
-    const updateForm = (({ target }) => setForm({ ...form, [target.name]: target.value }))
-	
-	
-	function prepareEdit(i) {
-		let item=data.allUser[i];
-		
-		setForm({email:item.email, nombre:item.nombre, rol:item.rol, password: '', usuarioId:item.usuarioId });
-		setEditItem(i);
-	}
-	
-	function prepareNew() {	
-		setForm({ email: '', nombre:'', rol:'', password: '', usuarioId:-1 });
-		setNewItem(true);
-	}
-	
-	function deleteUser(i) {
-			
-		props.client
-		  .query({
-			query: DELUSER,
-			variables: {usuarioId:data.allUser[i].usuarioId}
-		  })
-		  .then(result => {	
-				//console.log("res",result);
-				// veo si hay errores
-				if(result.errors !== undefined) {
-					// debe lanzar la ventana modal de error
-					console.log("error",result.errors[0].message);
-				} else {
-					// actualizo la tabla			
-					refetch()
-				}
-			}
-			);
-	}
-	
-	function validateEdit(i) {
-		let msgs="", edo=true;
-		
-		if(form.rol!=='') {
-			form.rol=parseInt(form.rol);
-			//console.log("...",form.rol); return false;
-			if(form.rol>2 || form.rol<0 || isNaN(form.rol)) {
-				edo=false; msgs=msgs+" El rol debe ser 0,1 o 2";
-			}
-		}
-		
-		return {edo,msgs};
-	}
-	
-	function saveEdit(i) {
-		// hago la llamada a GrapQL para que modifique los datos
-		let valida=validateEdit(i)	
-		if(!valida.edo) return;
-		
-		// si i=-1 agraga un nuevo usuario
-		props.client
-		  .query({
-			query: (i==-1? NEWUSER : EDITUSER),
-			variables: form
-		  })
-		  .then(result => {	
-				//console.log("res",result);
-				// veo si hay errores
-				if(result.errors !== undefined) {
-					// debe lanzar la ventana modal de error
-					console.log("error",result.errors[0].message);
-				} else {
-					// actualizo la tabla			
-					refetch()
-				}
-			}
-			);		  
-		setEditItem(-1);
-		setNewItem(false);
-	}
-	
-	function cancelEdit(i) {		
-		setEditItem(-1);
-		setNewItem(false);
-	}
-	
-	return (
-		<React.Fragment>
-			<h1 class="title">Administrar usuarios</h1>
-
-			<Section>	
-				<Button rounded color="primary" onClick={() => prepareNew() }>Agregar</Button>
-				
-			  <Table>
-				<thead>
-				  <tr>	
-					<th>Email</th>
-					<th>Nombre</th>
-					<th>Rol</th>
-					<th>Password</th>
-				  </tr>
-				 </thead>
-				 <tbody>
-				  {newItem && <tr >
-						<td><Input name="email" value={form.email} onChange={updateForm} /></td>
-						<td><Input name="nombre" value={form.nombre} onChange={updateForm} /></td>
-						<td><Input name="rol" value={form.rol} onChange={updateForm} /></td>
-						<td><Input name="password" value={form.password} onChange={updateForm} type="password"/></td>
-						<td>
-							<span className="icon">
-								<i onClick={() => {saveEdit(-1) }} className="fa fa-check"></i>
-							</span>
-						</td>
-						<td>
-							<span className="icon">
-								<i onClick={() => {cancelEdit() }} className="fa fa-times"></i>
-							</span>
-						</td>
-					  </tr>
-				  }
-				  {data && data.allUser.map(function(e,i) {
-						if(editItem == i) {						
-							return <tr key={i}>
-									<td><Input name="email" value={form.email} onChange={updateForm} /></td>
-									<td><Input name="nombre" value={form.nombre} onChange={updateForm} /></td>
-									<td><Input name="rol" value={form.rol} onChange={updateForm} /></td>
-									<td><Input name="password" value={form.password} onChange={updateForm} type="password"/></td>
-									<td>
-										<span className="icon">
-											<i onClick={() => {saveEdit(i) }} className="fa fa-check"></i>
-										</span>
-									</td>
-									<td>
-										<span className="icon">
-											<i onClick={() => {cancelEdit(i) }} className="fa fa-times"></i>
-										</span>
-									</td>
-								  </tr>
-						} else {
-							return <tr key={i}><td>{e.email}</td><td>{e.nombre}</td><td>{e.rol}</td><td></td>
-									<td>
-										<span className="icon">
-											<i onClick={() => {prepareEdit(i) }} className="fa fa-edit"></i>
-										</span>
-									</td>
-									<td>
-										<span className="icon">
-											<i onClick={() => {deleteUser(i) }} className="fa fa-trash"></i>
-										</span>
-									</td>
-									</tr>
-						}
-					})					
-				  }
-				  
-				 </tbody>
-			  </Table>
-
-			</Section>
-		</React.Fragment>
-	);
-})
-*/
 
 function MainLayout(props) {
 	return (
 	<Container>
 	<Columns>
-	  <Columns.Column size="half">
+	  <Columns.Column >
 		<Notification >			
-			{props.rol==2? (
-				<Solicitudes/>
+			{props.rol==0? (
+				<AdminBook />
 			) : (
 				<LibrosCont rol={props.rol}/>
 			)}
@@ -400,7 +173,7 @@ function MainLayout(props) {
 	  </Columns.Column>
 	  <Columns.Column>
 		<Notification color="info">
-			{props.rol===2? (
+			{props.rol==0? (
 				<AdminUsers />
 			 ):(
 				<div />
@@ -419,7 +192,7 @@ function MainLayout(props) {
 function App() {
 	const [userName, setUserName] = useState("");
 	const [userId, setUserId] = useState(0);
-	const [userRol, setUserRol] = useState(3);
+	const [userRol, setUserRol] = useState(localStorage.getItem("rol")===null?3:localStorage.getItem("rol"));
 	const [isLogin, setIsLogin] = useState(localStorage.getItem("token")===null?false:true);
 	
 	// Para mostrar la ventana de error
@@ -439,12 +212,11 @@ function App() {
 		var ld =await userLogin({ variables: { email: data.email , password: data.password } })
 		try {
 			localStorage.setItem('token',ld.data.login.token);
+			localStorage.setItem('rol',ld.data.login.usuario.rol);
 			setIsLogin(true);
 			setUserId(ld.data.login.usuario.usuarioId);
 			setUserName(ld.data.login.usuario.nombre);
 			setUserRol(ld.data.login.usuario.rol);
-			
-			console.log("...",ld);
 		}catch(e) {	}
 	}catch(e) {
 		console.log(e.message);
@@ -455,6 +227,7 @@ function App() {
   
   function logout() {
 	localStorage.removeItem("token");
+	localStorage.removeItem("rol");
 	setIsLogin(false);
 	setUserName("");
 	setUserRol(3);

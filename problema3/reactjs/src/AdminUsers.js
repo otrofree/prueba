@@ -54,7 +54,8 @@ const DELUSER=gql`
 	}
  `;
  
-
+//TODO - poner un select box en el campo de Rol
+//TODO - hacer paginación de los elementos
 var AdminUsers = withApollo((props) =>{
 	// los datos de todos los usuarios
 	const { loading, error, data, refetch } = useQuery(ALLUSER); 
@@ -116,7 +117,11 @@ var AdminUsers = withApollo((props) =>{
 	function saveEdit(i) {
 		// hago la llamada a GrapQL para que modifique los datos
 		let valida=validateEdit(i)	
-		if(!valida.edo) return;
+		if(!valida.edo) {
+			console.log("Error de formulario", valida.msgs);
+			return;
+		}
+
 		
 		// si i=-1 agraga un nuevo usuario
 		props.client
