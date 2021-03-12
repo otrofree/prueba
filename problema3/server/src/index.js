@@ -3,12 +3,13 @@ const typeDefs = require('./typeDefs.js');
 const resolvers = require('./resolvers.js');
 
 // para la generacion de token
-const { getUserId } = require('./utils');
+const { getUserData } = require('./utils');
 
 
 const { PrismaClient } = require('@prisma/client')
 
 const prisma = new PrismaClient()
+var checkGrants=true
 
 const server = new ApolloServer({
 	typeDefs,
@@ -19,9 +20,9 @@ const server = new ApolloServer({
 		return {
 		  ...req,
 		  prisma,
-		  userId:
+		  usuario:
 			req && req.headers.authorization
-			  ? getUserId(req)
+			  ? getUserData(req)
 			  : null
 		};
 	}

@@ -50,32 +50,12 @@ const typeDefs = gql`
 		newBorrow(libroId: Int!, usuarioId: Int!): Borrow
 		confirmBorrow(prestamoId: Int!): Msg
 		returnBorrow(prestamoId: Int!): Msg
+				
+		checkGrants(check:Boolean!): Msg
 	}  
 `;
-module.exports = typeDefs;
-
 /*
-
-		fPrestado:  String
-		fEntregaEstimada: String
-		fEntregaReal: String
-
-   type Usuario {
-    email: String!
-    nombre: String
-  }
-
-  type Query {
-    tasks: [Task]!
-    task(id: Int!): Task
-	profile: [User!]!
-  }
-  type Mutation {
-    addTask(
-      name: String!,
-      description: String!,
-      completed: Boolean!
-    ): Task!
-  }
-  
+ checkGrants  - es solo para depuracion
 */
+
+module.exports = typeDefs;

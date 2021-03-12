@@ -5,7 +5,7 @@ function getTokenPayload(token) {
   return jwt.verify(token, APP_SECRET);
 }
 
-function getUserId(req, authToken) {
+function getUserData(req, authToken) {
   if (req) {
     const authHeader = req.headers.authorization;
     if (authHeader) {
@@ -13,12 +13,12 @@ function getUserId(req, authToken) {
       if (!token) {
         throw new Error('No token found');
       }
-      const { userId } = getTokenPayload(token);
-      return userId;
+      const { usuarioId, rol } = getTokenPayload(token);
+      return {usuarioId,rol};
     }
   } else if (authToken) {
-    const { userId } = getTokenPayload(authToken);
-    return userId;
+    const { usuarioId, rol } = getTokenPayload(authToken);
+    return {usuarioId, rol};
   }
 
   throw new Error('Not authenticated');
@@ -26,5 +26,5 @@ function getUserId(req, authToken) {
 
 module.exports = {
   APP_SECRET,
-  getUserId
+  getUserData
 };

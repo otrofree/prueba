@@ -23,11 +23,22 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 
+// configuracion para prevenir el cache
+const defaultOptions: DefaultOptions = {
+      watchQuery: {
+        fetchPolicy: 'no-cache',
+        errorPolicy: 'ignore',
+      },
+      query: {
+        fetchPolicy: 'no-cache',
+        errorPolicy: 'all',
+      },
+    }
 
 const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
   cache: new InMemoryCache(),
-  //uri: 'http://localhost:4000/graphql'
   link: authLink.concat(httpLink),
+  defaultOptions: defaultOptions,
 });
 
 /*

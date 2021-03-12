@@ -7,14 +7,15 @@ const msgs ={
 	invalidPassword: "Password invalido",
 	bookNotFound:"El libro no existe",
 	borrowNotFound: "Prestamo no existe",
-	notGrants:"No tienes permisos para realizar esta accion",	
+	noGrants:"No tienes permisos para realizar esta accion",	
 }
 
+// para verificar permisos antes de procesar cualquier cosa
+var checkGrants=true;
 
 module.exports = {
 	Query: {
-		allUser: async (parent, args, context) => {
-			//console.log("paps", args);				
+		allUser: async (parent, args, context) => {	
 			return await context.prisma.usuario.findMany({});
 		},
 		
@@ -49,7 +50,7 @@ module.exports = {
 				throw new Error(msgs.invalidPassword);
 			}
 
-			const token = jwt.sign({ userId: usuario.id, rol: usuario.rol }, APP_SECRET);
+			const token = jwt.sign({ usuarioId: usuario.usuarioId, rol: usuario.rol }, APP_SECRET);
 
 			return {
 				token,
@@ -76,7 +77,10 @@ module.exports = {
 		},
 
 		newUser:  async(parent, args, context, info) => {
-			// checar el rol que
+			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(context.usuario.rol!=0) {
+				throw new Error(msgs.noGrants);
+			}
 			
 			// encripto la clave
 			const clave = await bcrypt.hash(args.password, 10);
@@ -91,7 +95,10 @@ module.exports = {
 		
 		
 		delUser: async(parent, args, context, info) => {
-			// checar el rol que
+			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(context.usuario.rol!=0) {
+				throw new Error(msgs.noGrants);
+			}
 			
 			// veo que el usuario exista
 			const userT = await context.prisma.usuario.findUnique({
@@ -113,7 +120,12 @@ module.exports = {
 		
 		
 		editUser: async(parent, args, context, info) => { 
-			// checar el rol que
+			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(checkGrants) {
+				if(context.usuario.rol!=0) {
+					throw new Error(msgs.noGrants);
+				}
+			}
 
 			// veo que el usuario exista
 			const userT = await context.prisma.usuario.findUnique({
@@ -128,9 +140,9 @@ module.exports = {
 			// procedo						
 			if(args.password) {				
 				// encripto la clave
-				args.clave = await bcrypt.hash(args.password, 10);
-				delete args.password;  // en la base no hay campo "password"
+				args.clave = await bcrypt.hash(args.password, 10);				
 			}
+			delete args.password;  // en la base no hay campo "password" en su lugar se llama "clave"
 			
 			const usuario = await context.prisma.usuario.update({
 				 where: { usuarioId: args.usuarioId  },
@@ -142,7 +154,10 @@ module.exports = {
 		
 		
 		newBook: async(parent, args, context, info) => { 
-			// checar el rol que
+			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(context.usuario.rol!=0) {
+				throw new Error(msgs.noGrants);
+			}
 			
 			const libro = await context.prisma.libro.create({
 				data: { ...args }
@@ -152,7 +167,10 @@ module.exports = {
 		},
 		
 		deleteBook: async(parent, args, context, info) => {
-			// checar el rol que
+			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(context.usuario.rol!=0) {
+				throw new Error(msgs.noGrants);
+			}
 			
 			// TODO - verificar que el libro no este prestado
 			// veo que el libro exista
@@ -175,7 +193,10 @@ module.exports = {
 		
 		
 		editBook: async(parent, args, context, info) => { 
-			// checar el rol que
+			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(context.usuario.rol!=0) {
+				throw new Error(msgs.noGrants);
+			}
 
 			// veo que el libro exista
 			const libroT = await context.prisma.libro.findUnique({
@@ -252,7 +273,12 @@ module.exports = {
 			return {msg:"ok"}
 		},
 		
-		
+		// solo para depuracion mediante 
+		checkGrants: async(parent, args, context, info) => { 
+			checkGrants=args.check;
+			
+			return {msg:"Checar permisos de usario antes de hacer un Mutate: "+args.check}
+		},		
 	},
   
  
