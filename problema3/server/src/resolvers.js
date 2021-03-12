@@ -293,10 +293,7 @@ module.exports = {
 		
 		
 		confirmBorrow: async(parent, args, context, info) => { 
-			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal			
-			
-			console.log("confirmar ",args);
-			
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal									
 			if(checkGrants) {
 				if(context.usuario.rol!=1) {
 					throw new Error(msgs.noGrants);

@@ -23,15 +23,44 @@ El archivo **Diseno_gral.pdf** es el documento. En el directorio *soporte* se ec
 
 Para esta solución se decidió dividir el proyecto en los siguientes ambientes:
 
-Servidor Web  
-Es un simple servidor web que sirve para ejecutar mostrar la página.
-Se localiza en el directorio **serverW**
-
-Servidor Datos
-Este es el servidor de **Negocio** y **Datos** (en esete ejemplo decidí que estarían juntos, por simplicidad).
+Servidor de Aplicacion/Negocio
 Se localiza en el directorio **server**
 
-Programa UI.
-Para el desarrollo del UI, decidí usar reactjs.
+Este es el servidor de **Negocio** y **Datos** (en este ejemplo decidí que estarían juntos, por simplicidad).
+
+Backend	
+	Node.js
+	Apollo server para graphQL 
+
+BAse de datos
+	Prisma sobre SQLite
+	
+
+
+Frontend.
 El codigo fuente esta en el directorio **reactjs**.
+Para el desarrollo use reactjs + Bulma (para CSS) +  apollo-client
+
+
+Cabe mencionar que antes de realizar esta prueba no sabia las tecnologías Apollo, Prisma o Bulma, así que en este timpo las investigue, estudio y apredí para resolver el problema
+
+### como ejecutar
+Debes tener instalado Node.js v10 o más, yarn (dentro de nodejs)
+
+Necesitas dos terminales del shell:
+**Terminal 1** 
+cd server
+yarn install
+yarn dev
+
+**Terminal 2** 
+cd reactjs
+yarn install
+http-server build
+
+despues habir tu navegaor esta dirección [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
+
+
+
+
 
