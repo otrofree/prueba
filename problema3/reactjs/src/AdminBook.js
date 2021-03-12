@@ -14,24 +14,6 @@ import { Button, Navbar, Form, Modal, Section, Container, Notification, Media, I
 const { Input, Field, Control, Label } = Form;
 
  
- /*
- type Book {
-		libroId: Int
-		titulo: String!
-		autor: String!
-		editorial: String!
-		sinopsis: String
-		edicion: String
-		prestamo: Borrow
-	}
-		allBook:[Book!]!
-		
- 		newBook(titulo: String!, autor: String!, editorial: String!,sinopsis: String, edicion: String): Book
-		deleteBook(libroId: Int!): Book
-		editBook(libroId: Int!, titulo: String, autor: String, editorial: String, sinopsis: String, edicion: String): Book		
-
-*/
-
 const ALLBOOK = gql`
    query {
 	allBook {
@@ -71,6 +53,7 @@ const DELBOOK=gql`
  `;
  
 //TODO - hacer paginación de los elementos
+//TODO - regresar mesajes de error	
 var AdminBook = withApollo((props) =>{
 	// los datos de todos los libros
 	const { loading, error, data, refetch } = useQuery(ALLBOOK); 
@@ -143,7 +126,7 @@ var AdminBook = withApollo((props) =>{
 			return;
 		}
 		
-		// si i=-1 agraga un nuevo usuario
+		// si i=-1 agraga un nuevo libro
 		props.client
 		  .query({
 			query: (i==-1? NEWBOOK : EDITBOOK),

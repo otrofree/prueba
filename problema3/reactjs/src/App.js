@@ -14,6 +14,9 @@ import { Button, Navbar, Form, Modal, Section, Container, Notification, Media, I
 // los componentes propios de la interfaz		
 import AdminUsers from './AdminUsers'
 import AdminBook from './AdminBook'
+import Libros from './Libros'
+import Prestamos from './Prestamos'
+import AdminPrestamos from './AdminPrestamos'
 		
 const { Input, Field, Control, Label } = Form;
 
@@ -143,44 +146,55 @@ var LibrosCont = withApollo((props) =>{
 	);
 })
 
-var Solicitudes = withApollo((props) =>{
-	async function doSearch(qry){
-
-	}
-	
-	return (
-		<React.Fragment>
-			<h1 class="title">Solicitudes de prestamo</h1>
-			<BuquedaComp search={doSearch} />
-			<div> OK </div>
-		</React.Fragment>
-	);
-})
-
 
 function MainLayout(props) {
+	const [update, setUpdate] = useState(0);
+	const updatePrestamo=()=> setUpdate(update+1)
+	const perfiles=["Administador","Bibliotecario","Lector"]
+	
 	return (
 	<Container>
+	<h1 className="title"> Bienvenido al portal de {perfiles[parseInt(props.rol)]}</h1>
 	<Columns>
 	  <Columns.Column >
 		<Notification >			
-			{props.rol==0? (
-				<AdminBook />
-			) : (
-				<LibrosCont rol={props.rol}/>
-			)}
+			{(() => {
+			switch (parseInt(props.rol)) {
+			  case 0: // admin
+				return <AdminBook />;
+			  case 1: // bibliotecatio
+				return <AdminPrestamos />;								
+			  case 2: // user
+				return <Libros rol={props.rol} usuarioId={props.usuarioId} updatePrestamo={updatePrestamo} />;
+			  default: // cualquier otra cosa
+				return <div />;			 
+			}
+		  })()}
 		</Notification>
 	  </Columns.Column>
-	  <Columns.Column>
-		<Notification color="info">
-			{props.rol==0? (
-				<AdminUsers />
-			 ):(
-				<div />
-			 )
-			 }
-		</Notification>
-	  </Columns.Column>
+
+			{(() => {
+				switch (parseInt(props.rol)) {
+				  case 0: // admin
+					return 	  <Columns.Column>
+								<Notification color="info">
+									<AdminUsers />
+								</Notification>
+							 </Columns.Column>;
+				  case 1: // bibliotecatio
+					return <div />;
+				  case 2: // user
+					return 	  <Columns.Column>
+								<Notification color="info">
+									<Prestamos rol={props.rol} usuarioId={props.usuarioId} update={update} />
+								</Notification>
+							 </Columns.Column>;
+				  
+					return 
+				  default: // cualquier otra cosa
+					return <div />;			 
+				}
+			  })()}	
 	</Columns>
 	</Container>
 	);
@@ -219,7 +233,7 @@ function App() {
 			setUserRol(ld.data.login.usuario.rol);
 		}catch(e) {	}
 	}catch(e) {
-		console.log(e.message);
+		//console.log(e.message);
 		setIsLogin(false);
 		setIsError({show:true, msg:e.message});		
 	}
@@ -270,7 +284,7 @@ function App() {
 	  {!isLogin ? (
 		<Login login={login}/> 
 	  ):(
-		<MainLayout rol={userRol} />
+		<MainLayout rol={userRol} usuarioId={userId} />
       )}
 	  
 	  <ErrorModal show={isError.show} onClose={closeModal} msg={isError.msg} />

@@ -31,11 +31,16 @@ const typeDefs = gql`
 	type Msg {
 		msg:String
 	}
+	
+	
 	type Query {
 		allUser(email:String):[User!]!
 		allBook:[Book!]!
-		myBorrow:[Borrow!]!
+		myBorrow(usuarioId: Int!):[Borrow!]!
+		allBorrow(estado: Int!):[Borrow!]!
 	}
+	
+	
 	type Mutation {
 		login(email: String!, password: String!): AuthPayload
 		setPassword(email: String!, password: String!): User
@@ -56,7 +61,14 @@ const typeDefs = gql`
 	}  
 `;
 /*
- checkGrants  - es solo para depuracion
+	Notas sobre las definiciones
+	
+	newBorrow  		- permite al usuario hacer el prestamo
+	confirmBorrow   - permite al bibliotecario aprobar un prestamo
+	returnBorrow	- permite al bibliotecario confirmar el regreso de un libro
+
+		
+	checkGrants  	- es solo para depuracion, no toma información del token de login que envia el servidor
 */
 
 module.exports = typeDefs;

@@ -23,15 +23,55 @@ module.exports = {
 			return await context.prisma.libro.findMany({});
 		},
 		
-		myBorrow: async (parent, args, context) => {
+		myBorrow: async (parent, args, context) => {	
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal			
+			if(checkGrants) {
+				if(context.usuario.rol!=2) {
+					throw new Error(msgs.noGrants);
+				}
+			}
+			
+			// tomo el Id del token, si el Id que le pasan en cero (sucede cuando se refresca la página)			
+			if(args.usuarioId == 0) {
+				args.usuarioId=context.usuario.usuarioId;
+			}
+			
 			return await context.prisma.prestamo.findMany({
+				where: { usuarioId: args.usuarioId},
 				select:{
 					prestamoId: true,
+					estado: true,
 					libro: { select: {libroId:true ,titulo:true, autor:true, editorial:true, sinopsis: true, edicion: true}},
 					usuario: {select: { usuarioId: true, email:true, nombre:true}}
 				} 
 			});
-		}		
+		},
+
+		
+		allBorrow: async (parent, args, context) => {	
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal			
+			if(checkGrants) {
+				if(context.usuario.rol!=1) {
+					throw new Error(msgs.noGrants);
+				}
+			}
+			
+			// si el estado = -1 quiere todos los prestamos
+			let where={}
+			if(args.estado >=0 && args.estado < 3 ) {
+				where={estado:args.estado};
+			}
+			
+			return await context.prisma.prestamo.findMany({
+				where: where,
+				select:{
+					prestamoId: true,
+					estado: true,
+					libro: { select: {libroId:true ,titulo:true, autor:true, editorial:true, sinopsis: true, edicion: true}},
+					usuario: {select: { usuarioId: true, email:true, nombre:true}}
+				}
+			});
+		}
 	},	
 	
 	
@@ -78,9 +118,11 @@ module.exports = {
 		},
 
 		newUser:  async(parent, args, context, info) => {
-			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
-			if(context.usuario.rol!=0) {
-				throw new Error(msgs.noGrants);
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(checkGrants) {
+				if(context.usuario.rol!=0) {
+					throw new Error(msgs.noGrants);
+				}
 			}
 			
 			// encripto la clave
@@ -96,9 +138,11 @@ module.exports = {
 		
 		
 		delUser: async(parent, args, context, info) => {
-			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
-			if(context.usuario.rol!=0) {
-				throw new Error(msgs.noGrants);
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(checkGrants) {
+				if(context.usuario.rol!=0) {
+					throw new Error(msgs.noGrants);
+				}
 			}
 			
 			// veo que el usuario exista
@@ -121,7 +165,7 @@ module.exports = {
 		
 		
 		editUser: async(parent, args, context, info) => { 
-			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
 			if(checkGrants) {
 				if(context.usuario.rol!=0) {
 					throw new Error(msgs.noGrants);
@@ -155,9 +199,11 @@ module.exports = {
 		
 		
 		newBook: async(parent, args, context, info) => { 
-			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
-			if(context.usuario.rol!=0) {
-				throw new Error(msgs.noGrants);
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(checkGrants) {
+				if(context.usuario.rol!=0) {
+					throw new Error(msgs.noGrants);
+				}
 			}
 			
 			const libro = await context.prisma.libro.create({
@@ -168,9 +214,11 @@ module.exports = {
 		},
 		
 		deleteBook: async(parent, args, context, info) => {
-			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
-			if(context.usuario.rol!=0) {
-				throw new Error(msgs.noGrants);
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(checkGrants) {
+				if(context.usuario.rol!=0) {
+					throw new Error(msgs.noGrants);
+				}
 			}
 			
 			// TODO - verificar que el libro no este prestado
@@ -194,11 +242,13 @@ module.exports = {
 		
 		
 		editBook: async(parent, args, context, info) => { 
-			// checar que se el tol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
-			if(context.usuario.rol!=0) {
-				throw new Error(msgs.noGrants);
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(checkGrants) {
+				if(context.usuario.rol!=0) {
+					throw new Error(msgs.noGrants);
+				}
 			}
-
+			
 			// veo que el libro exista
 			const libroT = await context.prisma.libro.findUnique({
 				where: { libroId: args.libroId }, 
@@ -220,19 +270,38 @@ module.exports = {
 		
 		
 		newBorrow: async(parent, args, context, info) => { 
-			// checar el rol que
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal
+			if(checkGrants) {
+				if(context.usuario.rol!=2) {
+					throw new Error(msgs.noGrants);
+				}
+			}
 			
+			// tomo el Id del token, si el Id que le pasan en cero (sucede cuando se refresca la página)
+			if(args.usuarioId == 0) {
+				args.usuarioId=context.usuario.usuarioId;
+			}
+			console.log("args2",args);
+			
+			//hago la acción
 			const libro = await context.prisma.prestamo.create({
 				data: { ...args, estado:0  }
 			});
-			//console.log(libro);
+
 			return libro;
 		},
 		
 		
 		confirmBorrow: async(parent, args, context, info) => { 
-			// checar el rol que
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal			
 			
+			console.log("confirmar ",args);
+			
+			if(checkGrants) {
+				if(context.usuario.rol!=1) {
+					throw new Error(msgs.noGrants);
+				}
+			}			
 			
 			// veo que el prestamo exista
 			const prestamo = await context.prisma.prestamo.findUnique({
@@ -254,7 +323,12 @@ module.exports = {
 		
 		
 		returnBorrow: async(parent, args, context, info) => { 
-			// checar el rol que
+			// checar que se el rol apropiado, 0-admin,1-bilbiotecario,2-usuario normal			
+			if(checkGrants) {
+				if(context.usuario.rol!=1) {
+					throw new Error(msgs.noGrants);
+				}
+			}
 
 			// veo que el prestamo exista
 			const prestamo = await context.prisma.prestamo.findUnique({
@@ -274,7 +348,7 @@ module.exports = {
 			return {msg:"ok"}
 		},
 		
-		// solo para depuracion mediante 
+		// solo para depuracion, permite usar el GraphQL playground para hacer las pruebas
 		checkGrants: async(parent, args, context, info) => { 
 			checkGrants=args.check;
 			
