@@ -62,7 +62,7 @@ yarn dev
 ```
 cd reactjs
 yarn install
-http-server build
+http-server buildApp
 ```
 
 despues habir tu navegaor esta dirección [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
